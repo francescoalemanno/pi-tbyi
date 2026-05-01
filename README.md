@@ -37,9 +37,13 @@ Then use the skills with:
 /skill:to-prd
 /skill:to-issues
 /skill:tdd
+/tbyi-implement
 ```
 
-The extension also registers `/tbyi-info` to confirm the package is loaded.
+The extension also registers:
+
+- `/tbyi-info` to confirm the package is loaded.
+- `/tbyi-implement [issue-file-or-directory]` to implement local issue files one by one, each in a clean session. With no argument it reads `docs/issues/*.md` in filename order.
 
 ## Attribution
 
