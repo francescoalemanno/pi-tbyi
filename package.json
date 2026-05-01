@@ -1,0 +1,14 @@
+{
+  "name": "pi-tbyi",
+  "version": "0.1.0",
+  "description": "Think Before You Implement: Pi extension bundling local-file workflow skills adapted from Matt Pocock's skills.",
+  "keywords": ["pi-package", "pi-extension", "skills", "tdd", "prd"],
+  "license": "MIT",
+  "type": "module",
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": ["./extensions"]
+  }
+}
