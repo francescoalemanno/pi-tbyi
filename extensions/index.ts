@@ -274,9 +274,10 @@ Flow:
 - Before your final response, update ${target.statusRelativePath}:
   - document what was implemented, what is still missing, and useful notes in the Markdown region
   - update the JSON header at the top according to the schema below
-  - set \`status\` to \`complete\` only when all PRD acceptance criteria are implemented, relevant checks pass, and nothing remains missing
-  - set \`status\` to \`blocked\` only when progress requires user/external input, and include \`blocked_reason\`
-  - set \`status\` to \`incomplete\` when work remains, checks fail, or checks cannot be run
+  - set \`status\` to \`complete\` when all automatable PRD acceptance criteria are implemented, relevant checks pass, and nothing remains missing that this coding agent can do
+  - if only human non-automatable tasks remain, such as manual QA, visual review, release approval, or physical/device checks, document them as follow-up notes but still set \`status\` to \`complete\`
+  - set \`status\` to \`blocked\` only when progress on automatable implementation requires user/external input, and include \`blocked_reason\`
+  - set \`status\` to \`incomplete\` when automatable work remains, checks fail, or checks cannot be run
 
 ${schemaInstructions()}
 
