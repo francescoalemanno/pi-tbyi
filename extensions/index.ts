@@ -242,6 +242,10 @@ async function validateStatusFile(statusPath: string): Promise<StatusValidation>
   return validateStatusContent(content);
 }
 
+function validationError(validation: StatusValidation): string {
+  return "error" in validation ? validation.error : "unknown validation error";
+}
+
 function schemaInstructions(): string {
   return `The status file must start with a valid JSON object, followed by a blank line and then Markdown.
 
@@ -300,7 +304,7 @@ async function repairStatusInSession(
       `tbyi: repairing invalid status header (${attempt}/${REPAIR_ATTEMPTS})`,
       "warning",
     );
-    await ctx.sendUserMessage(repairPrompt(target, validation.error));
+    await ctx.sendUserMessage(repairPrompt(target, validationError(validation)));
     await ctx.waitForIdle();
     validation = await validateStatusFile(target.statusAbsolutePath);
   }
@@ -308,34 +312,14 @@ async function repairStatusInSession(
   return validation;
 }
 
-async function runRepairOnlySession(
-  ctx: ExtensionCommandContext,
-  target: PrdTarget,
-  parentSession: string | undefined,
-): Promise<StatusValidation> {
-  let finalValidation: StatusValidation = await validateStatusFile(target.statusAbsolutePath);
-
-  const result = await ctx.newSession({
-    parentSession,
-    withSession: async (nextCtx) => {
-      nextCtx.ui.notify(`tbyi: repairing status file: ${target.statusRelativePath}`, "warning");
-      finalValidation = await repairStatusInSession(nextCtx, target);
-    },
-  });
-
-  if (result.cancelled) {
-    return { valid: false, error: "repair session cancelled" };
-  }
-
-  return finalValidation;
-}
-
-async function implementOneSlice(
+async function runImplementationLoop(
   ctx: ImplementContext,
   target: PrdTarget,
   parentSession: string | undefined,
-): Promise<StatusValidation> {
-  let finalValidation: StatusValidation = await validateStatusFile(target.statusAbsolutePath);
+  all: boolean,
+  staleIterations = 0,
+): Promise<void> {
+  const beforeHash = await targetHash(target);
 
   const result = await ctx.newSession({
     parentSession,
@@ -343,15 +327,44 @@ async function implementOneSlice(
       nextCtx.ui.notify(`tbyi: implementing PRD slice: ${target.relativePath}`, "info");
       await nextCtx.sendUserMessage(implementationPrompt(target));
       await nextCtx.waitForIdle();
-      finalValidation = await repairStatusInSession(nextCtx, target);
+
+      const validation = await repairStatusInSession(nextCtx, target);
+      if (!validation.valid) {
+        nextCtx.ui.notify(
+          `tbyi: invalid status file after repair: ${validationError(validation)}`,
+          "error",
+        );
+        return;
+      }
+
+      const afterHash = await targetHash(target);
+      const nextStaleIterations = afterHash === beforeHash ? staleIterations + 1 : 0;
+      if (afterHash === beforeHash) {
+        nextCtx.ui.notify(
+          `tbyi: PRD/status unchanged for ${nextStaleIterations} iteration(s)`,
+          "warning",
+        );
+      }
+
+      if (nextStaleIterations >= 2) {
+        nextCtx.ui.notify("tbyi: stopping after 2 unchanged PRD/status iterations", "warning");
+        return;
+      }
+
+      if (!all) return;
+
+      if (validation.header.status === "incomplete") {
+        await runImplementationLoop(nextCtx, target, parentSession, all, nextStaleIterations);
+        return;
+      }
+
+      nextCtx.ui.notify(`tbyi: stopped with status ${validation.header.status}`, "info");
     },
   });
 
   if (result.cancelled) {
-    return { valid: false, error: "implementation session cancelled" };
+    ctx.ui.notify("tbyi: implementation session cancelled", "error");
   }
-
-  return finalValidation;
 }
 
 async function fileHash(path: string): Promise<string> {
@@ -372,7 +385,7 @@ async function targetHash(target: PrdTarget): Promise<string> {
 }
 
 async function confirmContinueForStatus(
-  ctx: ExtensionCommandContext,
+  ctx: ImplementContext,
   validation: StatusValidation,
 ): Promise<boolean> {
   if (!validation.valid) return true;
@@ -480,45 +493,37 @@ export default function (pi: ExtensionAPI) {
       }
 
       const parentSession = ctx.sessionManager.getSessionFile();
-      let validation = await validateStatusFile(target.statusAbsolutePath);
+      const validation = await validateStatusFile(target.statusAbsolutePath);
       if (!validation.valid) {
-        validation = await runRepairOnlySession(ctx, target, parentSession);
-      }
+        const result = await ctx.newSession({
+          parentSession,
+          withSession: async (nextCtx) => {
+            nextCtx.ui.notify(`tbyi: repairing status file: ${target.statusRelativePath}`, "warning");
+            const repairedValidation = await repairStatusInSession(nextCtx, target);
 
-      if (!validation.valid) {
-        ctx.ui.notify(`tbyi: invalid status file after repair: ${validation.error}`, "error");
+            if (!repairedValidation.valid) {
+              nextCtx.ui.notify(
+                `tbyi: invalid status file after repair: ${validationError(repairedValidation)}`,
+                "error",
+              );
+              return;
+            }
+
+            if (!(await confirmContinueForStatus(nextCtx, repairedValidation))) return;
+
+            await runImplementationLoop(nextCtx, target, parentSession, parsedArgs.all);
+          },
+        });
+
+        if (result.cancelled) {
+          ctx.ui.notify("tbyi: repair session cancelled", "error");
+        }
         return;
       }
 
       if (!(await confirmContinueForStatus(ctx, validation))) return;
 
-      let staleIterations = 0;
-      do {
-        const beforeHash = await targetHash(target);
-        validation = await implementOneSlice(ctx, target, parentSession);
-
-        if (!validation.valid) {
-          ctx.ui.notify(`tbyi: invalid status file after repair: ${validation.error}`, "error");
-          return;
-        }
-
-        const afterHash = await targetHash(target);
-        if (afterHash === beforeHash) {
-          staleIterations += 1;
-          ctx.ui.notify(`tbyi: PRD/status unchanged for ${staleIterations} iteration(s)`, "warning");
-        } else {
-          staleIterations = 0;
-        }
-
-        if (staleIterations >= 2) {
-          ctx.ui.notify("tbyi: stopping after 2 unchanged PRD/status iterations", "warning");
-          return;
-        }
-
-        if (!parsedArgs.all) return;
-      } while (validation.header.status === "incomplete");
-
-      ctx.ui.notify(`tbyi: stopped with status ${validation.header.status}`, "info");
+      await runImplementationLoop(ctx, target, parentSession, parsedArgs.all);
     },
   });
 }
