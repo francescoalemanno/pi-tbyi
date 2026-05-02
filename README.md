@@ -6,14 +6,11 @@ Included skills:
 
 - `grill-me`
 - `to-prd`
-- `to-issues`
 - `tdd`
 
-The GitHub / remote issue-tracker workflows in `to-prd` and `to-issues` have been adapted to use local project files instead:
+The GitHub / remote issue-tracker workflow in `to-prd` has been adapted to use local project files instead:
 
 - PRDs are written to `docs/prds/` by default.
-- Issues are written to `docs/issues/` by default.
-- `needs-triage` is represented in YAML frontmatter.
 - Remote tracker references should be replaced by local file paths or pasted content.
 
 ## Install / use
@@ -35,15 +32,26 @@ Then use the skills with:
 ```text
 /skill:grill-me
 /skill:to-prd
-/skill:to-issues
 /skill:tdd
 /tbyi-implement
 ```
 
 The extension also registers:
 
+- `question-tool`, a structured user-question tool with 2-4 options plus automatic `Other` input. It does not persist answers to files.
 - `/tbyi-info` to confirm the package is loaded.
-- `/tbyi-implement [issue-file-or-directory]` to implement local issue files one by one, each in a clean session. With no argument it reads `docs/issues/*.md` in filename order.
+- `/tbyi-implement [--all] [prd-file]` to implement the highest-priority vertical slice from a PRD Markdown file in a clean session. If no PRD path is provided, it opens a simple picker for `docs/prds/*.md` plus manual path entry.
+
+`/tbyi-implement` derives a status file next to the PRD as `<prd-basename>.status.md`. The status file starts with a JSON object header followed by Markdown notes:
+
+```json
+{
+  "status": "incomplete",
+  "blocked_reason": null
+}
+```
+
+Allowed statuses are `incomplete`, `blocked`, and `complete`. The agent maintains the Markdown sections for what was implemented, what is missing, and notes. If the JSON header is invalid, the command asks the agent to repair it up to three times. With `--all`, each slice runs in a fresh session until the status becomes `complete`/`blocked` or the PRD+status files are unchanged for two iterations.
 
 ## Attribution
 
