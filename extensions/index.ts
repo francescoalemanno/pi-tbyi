@@ -264,11 +264,8 @@ Use this status file for progress tracking: ${target.statusRelativePath}
 
 Flow:
 - First read the PRD and the status file, then inspect the relevant code before editing.
-- You are free to decide the highest-priority vertical slice from the PRD.
-- Implement only one narrow, end-to-end vertical slice in this session.
 - If the slice requires human input, ask the user interactively during this session.
 - Suggest using the TDD skill when appropriate for the slice, but do not force TDD when it is not useful.
-- Keep changes focused and avoid unrelated refactors.
 - Treat the PRD as the source of truth; do not edit it unless explicitly necessary.
 - Run relevant checks/tests before finishing.
 - Before your final response, update ${target.statusRelativePath}:
