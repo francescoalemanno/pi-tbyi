@@ -8,3 +8,5 @@ Interview me relentlessly about every aspect of this plan until we reach a share
 Ask the questions one at a time.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
+
+When exploring the codebase, first look for `CONTEXT.md`, `CONTEXT-MAP.md`, and relevant ADRs under `docs/adr/` or `src/<context>/docs/adr/`. If these files do not exist, proceed silently. Use the project's glossary vocabulary in your questions and call out any conflict with existing ADRs.

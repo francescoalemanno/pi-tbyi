@@ -44,7 +44,16 @@ RIGHT (vertical):
 
 ### 1. Planning
 
-When exploring the codebase, use the project's domain glossary so that test names and interface vocabulary match the project's language, and respect ADRs in the area you're touching.
+When exploring the codebase, first look for:
+
+- `CONTEXT.md` at the repo root.
+- `CONTEXT-MAP.md` at the repo root. If present, use it to find relevant context-specific `CONTEXT.md` files.
+- `docs/adr/` for architectural decisions relevant to the area.
+- In multi-context repos, also check `src/<context>/CONTEXT.md` and `src/<context>/docs/adr/` when relevant.
+
+If these files do not exist, proceed silently. Do not suggest creating them up front.
+
+Use glossary terms from `CONTEXT.md` in test names, interface vocabulary, and implementation notes. If your plan contradicts an existing ADR, call that out explicitly before writing tests.
 
 Before writing any code:
 

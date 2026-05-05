@@ -6,8 +6,7 @@
   "license": "MIT",
   "type": "module",
   "peerDependencies": {
-    "@mariozechner/pi-coding-agent": "*",
-    "typebox": "*"
+    "@mariozechner/pi-coding-agent": "*"
   },
   "pi": {
     "extensions": ["./extensions"]

@@ -5,7 +5,41 @@ description: Turn the current conversation context into a PRD and save it to loc
 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
 
-Use local project files instead of GitHub or an external issue tracker.
+Default PRD location: `docs/prds/`.
+
+## Local Markdown conventions
+
+PRDs and issues live as Markdown files in the repository:
+
+- PRDs live in `docs/prds/` by default.
+- Implementation issues live in `docs/issues/` by default.
+- PRD filenames use a readable kebab-case slug: `docs/prds/<slug>.md`.
+- Triage labels are recorded in frontmatter under `labels`.
+- Work state is recorded in frontmatter under `status`.
+- Comments and conversation history, when needed, are appended under a `## Comments` heading.
+
+Use these triage labels:
+
+- `needs-triage` — maintainer needs to evaluate the PRD or issue.
+- `needs-info` — waiting on the requester for more information.
+- `ready-for-agent` — fully specified and ready for an AFK coding agent.
+- `ready-for-human` — requires human implementation or judgement.
+- `wontfix` — will not be actioned.
+
+Newly created PRD files should start with the `needs-triage` label and `status: open`.
+
+## Domain docs
+
+When exploring the codebase, first look for:
+
+- `CONTEXT.md` at the repo root.
+- `CONTEXT-MAP.md` at the repo root. If present, use it to find relevant context-specific `CONTEXT.md` files.
+- `docs/adr/` for architectural decisions relevant to the area.
+- In multi-context repos, also check `src/<context>/CONTEXT.md` and `src/<context>/docs/adr/` when relevant.
+
+If these files do not exist, proceed silently. Do not suggest creating them up front.
+
+Use glossary terms from `CONTEXT.md` in PRD titles, user stories, implementation decisions, testing decisions, and final notes. If the PRD contradicts an existing ADR, call that out explicitly in `Further Notes` rather than silently overriding it.
 
 ## Process
 
@@ -20,6 +54,12 @@ Check with the user that these modules match their expectations. Check with the 
 3. Write the PRD using the template below, then save it to a local project file. Apply the `needs-triage` triage label in the file so it enters the normal triage flow.
 
 <prd-template>
+---
+title: Short PRD title
+labels:
+  - needs-triage
+status: open
+---
 
 ## Problem Statement
 
@@ -69,6 +109,10 @@ A description of the things that are out of scope for this PRD.
 
 ## Further Notes
 
-Any further notes about the feature.
+Any further notes about the feature, including ADR conflicts or domain-language gaps discovered while writing the PRD.
+
+## Comments
+
+Append follow-up discussion or clarifications here if needed.
 
 </prd-template>

@@ -5,13 +5,21 @@ Think Before You Implement: a Pi extension package bundling selected skills adap
 Included skills:
 
 - `grill-me`
+- `grill-with-docs`
 - `to-prd`
+- `to-issues`
+- `triage`
 - `tdd`
+- `diagnose`
+- `zoom-out`
+- `improve-codebase-architecture`
 
-The GitHub / remote issue-tracker workflow in `to-prd` has been adapted to use local project files instead:
+The workflow uses local Markdown files:
 
 - PRDs are written to `docs/prds/` by default.
-- Remote tracker references should be replaced by local file paths or pasted content.
+- Issues are written to `docs/issues/` by default.
+- PRDs and issues use frontmatter labels such as `needs-triage`, `ready-for-agent`, and `wontfix`.
+- Skills read `CONTEXT.md`, `CONTEXT-MAP.md`, and ADRs when present, and proceed silently when they are absent.
 
 ## Install / use
 
@@ -31,14 +39,19 @@ Then use the skills with:
 
 ```text
 /skill:grill-me
+/skill:grill-with-docs
 /skill:to-prd
+/skill:to-issues
+/skill:triage
 /skill:tdd
+/skill:diagnose
+/skill:zoom-out
+/skill:improve-codebase-architecture
 /tbyi-implement
 ```
 
 The extension also registers:
 
-- `question-tool`, a structured user-question tool with 2-4 options plus automatic `Other` input. It does not persist answers to files.
 - `/tbyi-info` to confirm the package is loaded.
 - `/tbyi-implement [--all] [prd-file]` to implement the highest-priority vertical slice from a PRD Markdown file in a clean session. If no PRD path is provided, it opens a simple picker for `docs/prds/*.md` plus manual path entry.
 

@@ -3,7 +3,6 @@ import type {
   ExtensionCommandContext,
   ReplacedSessionContext,
 } from "@mariozechner/pi-coding-agent";
-import { Type } from "typebox";
 import { createHash } from "node:crypto";
 import { readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
@@ -407,62 +406,16 @@ async function confirmContinueForStatus(
   );
 }
 
-async function askQuestion(
-  ctx: ImplementContext,
-  question: string,
-  context: string | undefined,
-  options: string[],
-): Promise<string> {
-  if (!ctx.hasUI) throw new Error("question-tool requires an interactive UI.");
-
-  const choices = [...options, "Other"];
-  const title = context?.trim() ? `${question}\n\n${context.trim()}` : question;
-  const choice = await ctx.ui.select(title, choices);
-  const answer = choice === "Other" ? await ctx.ui.input("Custom answer:", "") : choice;
-  return answer?.trim() || "No answer provided";
-}
-
 export default function (pi: ExtensionAPI) {
   pi.on("resources_discover", () => ({
     skillPaths: [skillsPath],
   }));
 
-  pi.registerTool({
-    name: "question-tool",
-    label: "Question Tool",
-    description:
-      "Ask the user a structured question and wait for their answer. Use when user input is genuinely needed.",
-    promptSnippet: "Ask the user a structured question with concrete options plus Other.",
-    promptGuidelines: [
-      "Use question-tool when user input is genuinely needed and cannot be inferred safely.",
-      "Do not use question-tool for implementation details that can be inferred from the pre-existing code or from context.",
-      "When using question-tool, provide 2-4 concrete options and do not include Other; the tool adds Other automatically.",
-    ],
-    parameters: Type.Object({
-      question: Type.String({ description: "The question to ask the user." }),
-      context: Type.Optional(
-        Type.String({ description: "Brief context explaining why this answer is needed." }),
-      ),
-      options: Type.Array(Type.String(), {
-        minItems: 2,
-        maxItems: 4,
-        description: "Two to four concrete answer options. Do not include Other; the tool adds it automatically.",
-      }),
-    }),
-    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const answer = await askQuestion(ctx, params.question, params.context, params.options);
-      return {
-        content: [{ type: "text", text: `User answered: ${answer}` }],
-        details: { question: params.question, context: params.context, options: params.options, answer },
-      };
-    },
-  });
-
   pi.registerCommand("tbyi-info", {
     description: "Show information about the Think Before You Implement skill pack.",
     handler: async (_args, ctx) => {
       ctx.ui.notify(
-        "pi-tbyi loaded: /skill:grill-me, /skill:to-prd, /skill:tdd, /tbyi-implement, question-tool",
+        "pi-tbyi loaded: /skill:grill-me, /skill:grill-with-docs, /skill:to-prd, /skill:to-issues, /skill:triage, /skill:tdd, /skill:diagnose, /skill:zoom-out, /skill:improve-codebase-architecture, /tbyi-implement",
         "info",
       );
     },
