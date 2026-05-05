@@ -4,7 +4,16 @@
   "description": "Think Before You Implement: Pi extension bundling local-file workflow skills adapted from Matt Pocock's skills.",
   "keywords": ["pi-package", "pi-extension", "skills", "tdd", "prd"],
   "license": "MIT",
+  "files": [
+    "extensions",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
   "type": "module",
+  "dependencies": {
+    "typebox": "^1.1.24"
+  },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"
   },

@@ -4,6 +4,7 @@ import type {
   ReplacedSessionContext,
 } from "@mariozechner/pi-coding-agent";
 import { createHash } from "node:crypto";
+import boomerangExtension from "./boomerang.js";
 import { readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -407,6 +408,8 @@ async function confirmContinueForStatus(
 }
 
 export default function (pi: ExtensionAPI) {
+  boomerangExtension(pi);
+
   pi.on("resources_discover", () => ({
     skillPaths: [skillsPath],
   }));
@@ -415,7 +418,7 @@ export default function (pi: ExtensionAPI) {
     description: "Show information about the Think Before You Implement skill pack.",
     handler: async (_args, ctx) => {
       ctx.ui.notify(
-        "pi-tbyi loaded: /skill:grill-me, /skill:grill-with-docs, /skill:to-prd, /skill:to-issues, /skill:triage, /skill:tdd, /skill:diagnose, /skill:zoom-out, /skill:improve-codebase-architecture, /tbyi-implement",
+        "pi-tbyi loaded: /skill:grill-me, /skill:grill-with-docs, /skill:to-prd, /skill:to-issues, /skill:triage, /skill:tdd, /skill:diagnose, /skill:zoom-out, /skill:improve-codebase-architecture, /tbyi-implement, /boomerang",
         "info",
       );
     },

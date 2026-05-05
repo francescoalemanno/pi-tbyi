@@ -54,6 +54,7 @@ The extension also registers:
 
 - `/tbyi-info` to confirm the package is loaded.
 - `/tbyi-implement [--all] [prd-file]` to implement the highest-priority vertical slice from a PRD Markdown file in a clean session. If no PRD path is provided, it opens a simple picker for `docs/prds/*.md` plus manual path entry.
+- `/boomerang <task>` to execute an autonomous task and collapse the raw work context into a concise handoff summary. It also supports `/boomerang-cancel`, `/boomerang auto`, `/boomerang anchor`, template chains, and `--rethrow N` as implemented by `pi-boomerang`.
 
 `/tbyi-implement` derives a status file next to the PRD as `<prd-basename>.status.md`. The status file starts with a JSON object header followed by Markdown notes:
 
@@ -69,3 +70,5 @@ Allowed statuses are `incomplete`, `blocked`, and `complete`. The agent maintain
 ## Attribution
 
 This package is MIT licensed. The bundled skill instructions are adapted from Matt Pocock's `skills` repository: <https://github.com/mattpocock/skills>.
+
+The bundled `/boomerang` command is adapted from Nico Bailon's `pi-boomerang`: <https://github.com/nicobailon/pi-boomerang>.
