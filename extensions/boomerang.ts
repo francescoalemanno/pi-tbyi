@@ -10,9 +10,9 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import type { ThinkingLevel } from "@mariozechner/pi-agent-core";
-import { CustomEditor, type ExtensionAPI, type ExtensionContext, type ExtensionCommandContext, type SessionEntry, type SessionManager } from "@mariozechner/pi-coding-agent";
-import type { AssistantMessage, Model } from "@mariozechner/pi-ai";
+import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+import { CustomEditor, type ExtensionAPI, type ExtensionContext, type ExtensionCommandContext, type SessionEntry, type SessionManager } from "@earendil-works/pi-coding-agent";
+import type { AssistantMessage, Model } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
 
 interface BoomerangConfig {
@@ -1313,12 +1313,13 @@ export default function (pi: ExtensionAPI) {
       return editorRef;
     });
 
-    if (!editorRef?.onSubmit) {
+    const submit = (editorRef as CustomEditor & { onSubmit?: (text: string) => Promise<void> | void } | null)?.onSubmit;
+    if (!submit) {
       throw new Error("temporary editor was not wired for submission");
     }
 
     try {
-      await editorRef.onSubmit("/reload");
+      await submit("/reload");
     } finally {
       if (editorText.length > 0) {
         ctx.ui.setEditorText(editorText);
@@ -2320,7 +2321,4 @@ export default function (pi: ExtensionAPI) {
     await resetForSessionChange(ctx);
   });
 
-  pi.on("session_switch", async (_event, ctx) => {
-    await resetForSessionChange(ctx);
-  });
 }

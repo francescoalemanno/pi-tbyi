@@ -1,8 +1,4 @@
-import type {
-  ExtensionAPI,
-  ExtensionCommandContext,
-  ReplacedSessionContext,
-} from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { createHash } from "node:crypto";
 import boomerangExtension from "./boomerang.js";
 import { readFile, readdir, stat, writeFile } from "node:fs/promises";
@@ -15,6 +11,9 @@ const skillsPath = resolve(packageRoot, "skills");
 const MANUAL_PATH_CHOICE = "Enter another path…";
 const REPAIR_ATTEMPTS = 3;
 
+type ReplacedSessionContext = Parameters<
+  NonNullable<NonNullable<Parameters<ExtensionCommandContext["newSession"]>[0]>["withSession"]>
+>[0];
 type ImplementContext = ExtensionCommandContext | ReplacedSessionContext;
 type StatusValue = "incomplete" | "blocked" | "complete";
 
